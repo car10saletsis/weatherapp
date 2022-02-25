@@ -18,42 +18,53 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setContentView(binding.root)
+       binding = ActivityMainBinding.inflate(layoutInflater)
+       setContentView(binding.root)
 
         setupActionBar()
-    }
+      }
 
-
-    private fun setupActionBar(){
+    private fun setupActionBar() {
         lifecycleScope.launch {
             formatResponse(getWeather())
         }
     }
 
+        private suspend fun getWeather(): WeatherEntity = withContext(Dispatchers.IO)
+        {
+            setUpTitle("Consultando")
+            val retrofit: Retrofit = Retrofit.Builder()
+                .baseUrl("https://api.openweathermap.org/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
 
-    private suspend fun getWeather(): WeatherEntity = withContext(Dispatchers.IO){
-        setupTitle("Consultando")
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+            val service: WeatherService = retrofit.create(WeatherService::class.java)
 
-        val service: WeatherService = retrofit.create(WeatherService::class.java)
+            service.getWeatherById(3530597L, "metric", "aea11b5fadb63b272924320f5f10e4b3")
+       }
 
-        service.getWeatherById(4005539L, "metric", "6b248fcdbc1b781fb1e7dbb127a0b260")
-    }
 
-        private fun setupTitle(newTitle: String){
-            supportActionBar?.let { {title = newTitle} }
+
+        private fun setUpTitle(newTitle: String){
+        supportActionBar?.let{ title = newTitle}
         }
 
-    private fun formatResponse(weatherEntity: WeatherEntity) {
-        val temp = "${weatherEntity.main.temp} C`"
+    private fun formatResponse(weatherEntity: WeatherEntity){
+        val temp = "${weatherEntity.main.temp} C"
         val name = weatherEntity.name
         val country = weatherEntity.sys.country
-        setupTitle("$temp in $name, $country")
+        setUpTitle("$temp in $name, $country")
     }
-}
+
+
+
+
+
+
+
+    }
+
