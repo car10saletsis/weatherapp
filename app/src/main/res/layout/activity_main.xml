@@ -25,7 +25,7 @@
         tools:text="Nuacalpan de Juarez" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/dateTextView"
         style="@style/TextAppearance.MaterialComponents.Subtitle1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,51 +37,51 @@
         tools:text="11 de Febrero de 2020" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/statusTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/dateTextView"
         android:textSize="24sp"
         android:textStyle="bold"
         tools:text="Cielo Despejado" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/temperatureTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/statusTextView"
         android:textSize="100sp"
         android:textStyle="italic"
         tools:text="25~" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/tempMinTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/textView3"
-        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintEnd_toStartOf="@+id/temperatureTextView"
+        app:layout_constraintTop_toBottomOf="@+id/temperatureTextView"
         tools:text="Min: 15~" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/tempMaxTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintStart_toEndOf="@+id/temperatureTextView"
+        app:layout_constraintTop_toBottomOf="@+id/temperatureTextView"
         tools:text="Max: 20~" />
 
     <ProgressBar
@@ -92,6 +92,6 @@
         android:layout_marginTop="64dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/temperatureTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

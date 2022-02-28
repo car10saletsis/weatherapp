@@ -2,6 +2,7 @@ package com.example.weatherapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.network.WeatherEntity
@@ -11,7 +12,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
+import java.lang.Exception
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,11 +27,12 @@ class MainActivity : AppCompatActivity() {
        binding = ActivityMainBinding.inflate(layoutInflater)
        setContentView(binding.root)
 
-        setupActionBar()
+        setUpViewData()
       }
 
-    private fun setupActionBar() {
-        lifecycleScope.launch {
+    private fun setUpViewData() {
+
+        lifecycleScope.launch{
             formatResponse(getWeather())
         }
     }
@@ -54,10 +57,32 @@ class MainActivity : AppCompatActivity() {
         }
 
     private fun formatResponse(weatherEntity: WeatherEntity){
-        val temp = "${weatherEntity.main.temp} C"
-        val name = weatherEntity.name
-        val country = weatherEntity.sys.country
-        setUpTitle("$temp in $name, $country")
+       try{
+           val temp = "${weatherEntity.main.temp} C"
+           val name = weatherEntity.name
+           val country = weatherEntity.sys.country
+           val address = "$name, $country"
+           val dateNow = Calendar.getInstance().time
+           val tempMin = "Min: ${weatherEntity.main.temp_min.toInt()}~"
+           val tempMax = "${weatherEntity.main.temp_max.toInt()}~"
+           val status = "Sensacion ${weatherEntity.main.feels_like.toInt()}"
+
+
+           binding.apply {
+               addressTextView.text = address
+               dateTextView.text = dateNow.toString()
+               temperatureTextView.text = temp
+               statusTextView.text = status
+               tempMinTextView.text = tempMin
+               tempMaxTextView.text = tempMax
+
+           }
+       } catch (exception: Exception){
+           //showError("Ha ocurrido un error")
+           Log.e("Error format", "Ha ocurrido un error")
+       }
+
+
     }
 
 
