@@ -3,6 +3,8 @@ package com.example.weatherapp
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.network.WeatherEntity
@@ -77,19 +79,29 @@ class MainActivity : AppCompatActivity() {
                tempMaxTextView.text = tempMax
 
            }
+            showIndicator(false)
+
        } catch (exception: Exception){
-           //showError("Ha ocurrido un error")
+           showError("Ha ocurrido un error")
            Log.e("Error format", "Ha ocurrido un error")
        }
 
 
-    }
-
-
-
 
 
 
 
     }
+
+    private fun showError(message: String){
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showIndicator(visible: Boolean) {
+        binding.progressBarIndicator.isVisible = visible
+
+    }
+
+
+}
 
