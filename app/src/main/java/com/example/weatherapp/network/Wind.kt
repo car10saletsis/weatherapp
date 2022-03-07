@@ -1,3 +1,5 @@
 package com.example.weatherapp.network
 
-data class Wind()
+data class Wind(
+    val speed: Double
+)

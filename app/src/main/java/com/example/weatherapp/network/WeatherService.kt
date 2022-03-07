@@ -8,6 +8,7 @@ interface WeatherService {
     suspend fun getWeatherById(
         @Query("id") lon: Long,
         @Query("units") units: String?,
+        @Query("lang") lang: String?, //Idioma
         @Query("appid") appid: String): WeatherEntity
 
 

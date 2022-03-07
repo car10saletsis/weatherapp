@@ -6,15 +6,18 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import coil.load
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.network.WeatherEntity
 import com.example.weatherapp.network.WeatherService
+import com.example.weatherapp.utils.checkForInternet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.Exception
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -34,9 +37,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpViewData() {
 
-        lifecycleScope.launch{
-            formatResponse(getWeather())
+        if(checkForInternet(this)) {
+            lifecycleScope.launch{
+                formatResponse(getWeather())
+            }
+        } else{
+            showError("Sin aceeso a internet")
+            //Se pone invisible los detalles del clima
         }
+
     }
 
         private suspend fun getWeather(): WeatherEntity = withContext(Dispatchers.IO)
@@ -49,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
             val service: WeatherService = retrofit.create(WeatherService::class.java)
 
-            service.getWeatherById(3530597L, "metric", "aea11b5fadb63b272924320f5f10e4b3")
+            service.getWeatherById(3530597L, "metric", "sp", "aea11b5fadb63b272924320f5f10e4b3")
        }
 
 
@@ -67,7 +76,20 @@ class MainActivity : AppCompatActivity() {
            val dateNow = Calendar.getInstance().time
            val tempMin = "Min: ${weatherEntity.main.temp_min.toInt()}~"
            val tempMax = "${weatherEntity.main.temp_max.toInt()}~"
-           val status = "Sensacion ${weatherEntity.main.feels_like.toInt()}"
+           val status = weatherEntity.weather[0].description.uppercase()
+           val dt = weatherEntity.dt
+           val updateAt = "Actualizado: ${SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(dt*1000))}"
+           val sunrise = weatherEntity.sys.sunrise
+           val sunriseFormat = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunrise*1000))
+           val sunset = weatherEntity.sys.sunset
+           val sunsetFormat = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunset*1000))
+           val wind = "${weatherEntity.wind.speed} km//hr"
+           val pressure = "${weatherEntity.main.pressure} mb"
+           val humidity = "${weatherEntity.main.feels_like.toInt()}~"
+           val icon = weatherEntity.weather[0].icon
+           val iconUrl = "https://openweathermap.org/img/w/$icon.png"
+           val feelsLike = "Sensacion: ${weatherEntity.main.feels_like.toInt()}"
+
 
 
            binding.apply {
@@ -77,6 +99,13 @@ class MainActivity : AppCompatActivity() {
                statusTextView.text = status
                tempMinTextView.text = tempMin
                tempMaxTextView.text = tempMax
+               sunriseTextView.text = sunriseFormat
+               sunsetTextView.text = sunsetFormat
+               windTextView.text = wind
+               humidityTextView.text = humidity
+               pressureTextView.text = pressure
+               feelsLikeTextView.text = feelsLike
+               iconImageView.load(iconUrl)
 
            }
             showIndicator(false)

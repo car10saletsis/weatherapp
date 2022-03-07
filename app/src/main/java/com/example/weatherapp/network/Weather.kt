@@ -1,3 +1,7 @@
 package com.example.weatherapp.network
 
-data class Weather()
+data class Weather(
+    val main: String,
+    val description: String,
+    val icon: String
+)
