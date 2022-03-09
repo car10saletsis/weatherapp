@@ -1,18 +1,32 @@
 package com.example.weatherapp
 
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.load
+import com.example.weatherapp.BuildConfig.APPLICATION_ID
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.network.WeatherEntity
 import com.example.weatherapp.network.WeatherService
 import com.example.weatherapp.utils.checkForInternet
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,7 +39,17 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    private val TAG = "MainActivityError"
+    private val REQUEST_PERMISSIONS_REQUEST_CODE = 34
+
+
+    private var latitude = ""
+    private var longitude = ""
+
+
     private lateinit var binding: ActivityMainBinding
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
 
 
@@ -33,6 +57,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
        binding = ActivityMainBinding.inflate(layoutInflater)
        setContentView(binding.root)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         setUpViewData()
       }
@@ -66,7 +92,9 @@ class MainActivity : AppCompatActivity() {
 
         private suspend fun getWeather(): WeatherEntity = withContext(Dispatchers.IO)
         {
-            setUpTitle("Consultando")
+            Log.e(TAG, "CORR Lat: $latitude Long: $longitude")
+            showIndicator(true)
+            //setUpTitle("Consultando")
             val retrofit: Retrofit = Retrofit.Builder()
                 .baseUrl("https://api.openweathermap.org/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -74,7 +102,7 @@ class MainActivity : AppCompatActivity() {
 
             val service: WeatherService = retrofit.create(WeatherService::class.java)
 
-            service.getWeatherById(3530597L, "metric", "sp", "aea11b5fadb63b272924320f5f10e4b3")
+            service.getWeatherById(latitude, longitude, "metric", "sp", "aea11b5fadb63b272924320f5f10e4b3")
        }
 
 
@@ -131,11 +159,6 @@ class MainActivity : AppCompatActivity() {
            Log.e("Error format", "Ha ocurrido un error")
        }
 
-
-
-
-
-
     }
 
     private fun showError(message: String){
@@ -147,6 +170,82 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun checkPermissions() =
+        ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED
 
-}
+    private fun startLocationPermissionRequest(){
+        ActivityCompat.requestPermissions(this, arrayOf(ACCESS_COARSE_LOCATION),
+        REQUEST_PERMISSIONS_REQUEST_CODE)
+    }
+
+    private fun requestPermissions(){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, ACCESS_COARSE_LOCATION)){
+            Log.i(TAG, "Muestra explicacion de porque se requiere el permiso")
+            showSnackbar(R.string.permission_rationale, R.string.ok){
+                startLocationPermissionRequest()
+            }
+        }else {
+            Log.i(TAG, "Solicitando Permiso")
+            startLocationPermissionRequest()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getLastLocation(){
+        fusedLocationClient.lastLocation
+        .addOnCompleteListener{ taskLocation->
+            if (taskLocation.isSuccessful && taskLocation.result != null){
+                val location = taskLocation.result
+
+                latitude = location?.latitude.toString()
+                longitude = location?.longitude.toString()
+                Log.d(TAG, "GetLasLoc Lat: $latitude Long: $longitude")
+            } else {
+                Log.w(TAG, "getLastLocation:exception", taskLocation.exception)
+                showSnackbar(R.string.no_location_detected)
+            }
+        }
+        }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Log.i(TAG, "onRequestPermissionsResult")
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE){
+            when{
+                grantResults.isEmpty() -> Log.i(TAG, "Operacion cancelada")
+                (grantResults[0] == PackageManager.PERMISSION_GRANTED) -> getLastLocation()
+
+                else ->{
+                    showSnackbar(R.string.permission_denied_explanation, R.string.settings)
+                    {
+                        val intent = Intent().apply {
+                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            data = Uri.fromParts("package", APPLICATION_ID, null)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        startActivity(intent)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showSnackbar(
+        snackStrid: Int,
+        actionStrid: Int = 0,
+        listener: View.OnClickListener? = null
+    ){
+        val snackbar = Snackbar.make(findViewById(android.R.id.content), getString(snackStrid),
+        LENGTH_INDEFINITE)
+        if (actionStrid != 0 && listener !=null) {
+            snackbar.setAction(getString(actionStrid), listener)
+        }
+        snackbar.show()
+    }
+    }
+
 
