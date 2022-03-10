@@ -171,18 +171,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun formatResponse(weatherEntity: WeatherEntity){
 
-        var unitSymbol = "C"
+        var unitSymbol = "ºC"
         if (units){
-            unitSymbol = "F"
+            unitSymbol = "ºF"
         }
        try{
-           val temp = "${weatherEntity.main.temp} C"
+           val temp = "${weatherEntity.main.temp}$unitSymbol"
            val name = weatherEntity.name
            val country = weatherEntity.sys.country
            val address = "$name, $country"
            val dateNow = Calendar.getInstance().time
-           val tempMin = "Min: ${weatherEntity.main.temp_min.toInt()}~"
-           val tempMax = "${weatherEntity.main.temp_max.toInt()}~"
+           val tempMin = "Min: ${weatherEntity.main.temp_min.toInt()} $unitSymbol"
+           val tempMax = "Max: ${weatherEntity.main.temp_max.toInt()} $unitSymbol"
            val status = weatherEntity.weather[0].description.uppercase()
            val dt = weatherEntity.dt
            val updateAt = "Actualizado: ${SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(dt*1000))}"
@@ -190,27 +190,30 @@ class MainActivity : AppCompatActivity() {
            val sunriseFormat = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunrise*1000))
            val sunset = weatherEntity.sys.sunset
            val sunsetFormat = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunset*1000))
-           val wind = "${weatherEntity.wind.speed} km//hr"
-           val pressure = "${weatherEntity.main.pressure} mb"
-           val humidity = "${weatherEntity.main.feels_like.toInt()}~"
+           //val wind = "${weatherEntity.wind.speed} km//hr"
+          // val pressure = "${weatherEntity.main.pressure} mb"
+           //val humidity = "${weatherEntity.main.feels_like.toInt()}~"
            val icon = weatherEntity.weather[0].icon
            val iconUrl = "https://openweathermap.org/img/w/$icon.png"
            val feelsLike = "Sensacion: ${weatherEntity.main.feels_like.toInt()}"
+           val sdf = SimpleDateFormat("dd/M/yyyy")
+           val currentDate = sdf.format(Date())
+
 
 
 
            binding.apply {
                addressTextView.text = address
-               dateTextView.text = dateNow.toString()
+               dateTextView.text = currentDate//dateNow.toString()
                temperatureTextView.text = temp
                statusTextView.text = status
                tempMinTextView.text = tempMin
                tempMaxTextView.text = tempMax
                sunriseTextView.text = sunriseFormat
                sunsetTextView.text = sunsetFormat
-               windTextView.text = wind
-               humidityTextView.text = humidity
-               pressureTextView.text = pressure
+               //windTextView.text = wind
+              // humidityTextView.text = humidity
+             //  pressureTextView.text = pressure
                feelsLikeTextView.text = feelsLike
                iconImageView.load(iconUrl)
 
