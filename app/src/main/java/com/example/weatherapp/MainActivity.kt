@@ -141,6 +141,16 @@ class MainActivity : AppCompatActivity() {
         {
             Log.e(TAG, "CORR Lat: $latitude Long: $longitude")
             showIndicator(true)
+            var unit = "metric"
+            var languageCode = "sp"
+
+            if (units) {
+                unit = "imperial"
+            }
+            if (language){
+                languageCode = "en"
+            }
+
             //setUpTitle("Consultando")
             val retrofit: Retrofit = Retrofit.Builder()
                 .baseUrl("https://api.openweathermap.org/")
@@ -154,11 +164,17 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        private fun setUpTitle(newTitle: String){
-        supportActionBar?.let{ title = newTitle}
-        }
+      //  private fun setUpTitle(newTitle: String){
+        //supportActionBar?.let{ title = newTitle}
+       // }
+
 
     private fun formatResponse(weatherEntity: WeatherEntity){
+
+        var unitSymbol = "C"
+        if (units){
+            unitSymbol = "F"
+        }
        try{
            val temp = "${weatherEntity.main.temp} C"
            val name = weatherEntity.name
