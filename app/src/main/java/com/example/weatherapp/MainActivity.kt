@@ -4,6 +4,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.load
@@ -25,6 +27,7 @@ import com.example.weatherapp.network.WeatherService
 import com.example.weatherapp.utils.checkForInternet
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
@@ -55,12 +58,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       binding = ActivityMainBinding.inflate(layoutInflater)
+       installSplashScreen()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
        setContentView(binding.root)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        setUpViewData()
+
+        if(!checkPermissions()) {
+            requestPermissions()
+        } else{
+            getLastLocation(){ location ->
+                setUpViewData(location)
+                }
+        }
+
+
+
       }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -71,16 +86,41 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             R.id.menu_actualizar -> {
-                Toast.makeText(this, "Mebnu seleccionado", Toast.LENGTH_SHORT).show()
+               // Toast.makeText(this, "Mebnu seleccionado", Toast.LENGTH_SHORT).show()
+                showCreateUserDialog("27")
             }
+           // R.id.preferencias_menu ->{
+             //   val intent = Intent(this, SettingsActivity::class.java)
+               // startActivity(intent)
+            //}
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun setUpViewData() {
+    private fun showCreateUserDialog(temperature: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("La tempreatura actual es: \"$temperature\".")
+            .setMessage("Quieres cambiar de ubicacion?")
+            .setPositiveButton("Nueva ubicacion"){_, _ ->
+                onConfirmLocationChange()
+            }
+            .setNegativeButton("cancelar"){ _, _ ->
+                showSnackbar(R.string.canceled_action)
+            }
+            .show()
+
+    }
+
+    private fun onConfirmLocationChange() {
+        //empty
+    }
+
+    private fun setUpViewData(location : Location) {
 
         if(checkForInternet(this)) {
             lifecycleScope.launch{
+                latitude = location.latitude.toString()
+                longitude = location.longitude.toString()
                 formatResponse(getWeather())
             }
         } else{
@@ -191,7 +231,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun getLastLocation(){
+    private fun getLastLocation(onLocation: (location: Location) -> Unit){
         fusedLocationClient.lastLocation
         .addOnCompleteListener{ taskLocation->
             if (taskLocation.isSuccessful && taskLocation.result != null){
@@ -200,6 +240,8 @@ class MainActivity : AppCompatActivity() {
                 latitude = location?.latitude.toString()
                 longitude = location?.longitude.toString()
                 Log.d(TAG, "GetLasLoc Lat: $latitude Long: $longitude")
+
+                onLocation(taskLocation.result)
             } else {
                 Log.w(TAG, "getLastLocation:exception", taskLocation.exception)
                 showSnackbar(R.string.no_location_detected)
@@ -217,7 +259,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE){
             when{
                 grantResults.isEmpty() -> Log.i(TAG, "Operacion cancelada")
-                (grantResults[0] == PackageManager.PERMISSION_GRANTED) -> getLastLocation()
+                (grantResults[0] == PackageManager.PERMISSION_GRANTED) -> getLastLocation(this::setUpViewData)
 
                 else ->{
                     showSnackbar(R.string.permission_denied_explanation, R.string.settings)
