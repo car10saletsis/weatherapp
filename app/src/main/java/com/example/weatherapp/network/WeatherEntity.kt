@@ -1,6 +1,9 @@
 package com.example.weatherapp.network
 
 data class WeatherEntity(
+
+    //val current: Current
+
     val base: String,
     val main: Main,
     val sys: Sys,

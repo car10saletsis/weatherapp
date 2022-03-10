@@ -4,7 +4,10 @@
 
     <item
         android:id="@+id/menu_actualizar"
-        android:icon="@android:drawable/ic_menu_save"
         android:title="Actualizar"
-        app:showAsAction="ifRoom" />
+         />
+    <item
+        android:id="@+id/preferencias_menu"
+        android:title="Preferencias"
+        app:showAsAction="never" />
 </menu>

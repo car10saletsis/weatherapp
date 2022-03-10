@@ -19,6 +19,7 @@ import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import coil.load
 import com.example.weatherapp.BuildConfig.APPLICATION_ID
 import com.example.weatherapp.databinding.ActivityMainBinding
@@ -49,6 +50,10 @@ class MainActivity : AppCompatActivity() {
     private var latitude = ""
     private var longitude = ""
 
+    private var units = false
+    private var language = false
+
+
 
     private lateinit var binding: ActivityMainBinding
 
@@ -74,7 +79,9 @@ class MainActivity : AppCompatActivity() {
                 }
         }
 
-
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        units = sharedPreferences.getBoolean("units", false)
+        language = sharedPreferences.getBoolean("language", false)
 
       }
 
@@ -89,10 +96,10 @@ class MainActivity : AppCompatActivity() {
                // Toast.makeText(this, "Mebnu seleccionado", Toast.LENGTH_SHORT).show()
                 showCreateUserDialog("27")
             }
-           // R.id.preferencias_menu ->{
-             //   val intent = Intent(this, SettingsActivity::class.java)
-               // startActivity(intent)
-            //}
+            R.id.preferencias_menu->{
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
